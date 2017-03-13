@@ -186,13 +186,10 @@ public class BrainGUI extends JFrame {
 		btnRun.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
-				try {
+				
 					System.out.println("Running...");
-					output = Methods.RUN();
-				} catch (IOException e1) {
-					
-					e1.printStackTrace();
-				}
+					Methods.main(null);
+				
 			}
 		});
 		btnRun.setBounds(412, 41, 89, 23);

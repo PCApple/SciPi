@@ -8,11 +8,14 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 
 public class Methods {
 	int num_simpairs = 1000000;
-    public static int max_its;
+	public File importFile;
+    public static int max_its = 10;
     public static double res;
     int[] firstxcords = new int[num_simpairs];
     int[] firstycords = new int[num_simpairs];
@@ -22,18 +25,15 @@ public class Methods {
     int tempx;
     int tempy;
     int tempang;
-    private static float[] array;
-    private static int length;
-    public int radius;
-    float outbrain[][] = new float[1024][1024];
+    public int radius = 1;
     static float brain[][] = new float [1024][1024];
     ByteBuffer buffer = ByteBuffer.allocate(brain.length*Integer.BYTES);
     float angles[] = new float[num_simpairs];
     float difs[] = new float[num_simpairs];
     protected File defaultSaveFile = new File((System.getProperty("user.home") + System.getProperty("file.separator") + "Desktop\\BrainOutput.txt"));
-        public static ArrayList<String> RUN() throws IOException  {
-     	   ArrayList<String> outbrain = new ArrayList<String>();
-     	    float brain[][] =  importRawFile("C:\\Users\\jcase\\Downloads\\vector.raw");
+        public static void main(String [] args)  {
+        	float[][] outbrain = null;
+     	    float brain[][] =  importRawFile("C:\\Users\\JACHICKEN\\Downloads\\cerebrum-PET.raw");
      	    int it = 0;
      	    
      	    for (int i = 0; i<1024; i++){
@@ -44,21 +44,22 @@ public class Methods {
      	    }
      	    ByteBuffer.allocate(brain.length*Integer.BYTES);
      	    while(it<max_its){
+     	    	it++;
      	    	//creeating cordinate pairs
      	    	ArrayList<ArrayList<Float[]>> bigcords = new ArrayList<ArrayList<Float[]>> ();    
          	    float[] difs = new float[1048576];
          	    for (int i=0; i<1024; i++){
          		   for (int j =0; j<1024; j++){
          			   int[] seccordArray = findRandomPosition(i, j);
-         			   Float[] fcs = new Float[2];
-         			   fcs[0] = (float) i;
-         			   fcs[1] = (float) j;
-         			   Float[] scs = new Float[2];
-         			   scs[0] = (float) seccordArray[0];
-         			   scs[1] = (float) seccordArray[1];
+         			   Float[] firstCordsSet = new Float[2];
+         			   firstCordsSet[0] = (float) i;
+         			   firstCordsSet[1] = (float) j;
+         			   Float[] secondCordsSet = new Float[2];
+         			   secondCordsSet[0] = (float) seccordArray[0];
+         			   secondCordsSet[1] = (float) seccordArray[1];
          			   ArrayList<Float[]> cords = new ArrayList<Float[]>();
-         			   cords.add(fcs);
-         			   cords.add(scs);
+         			   cords.add(firstCordsSet);
+         			   cords.add(secondCordsSet);
          			   bigcords.add(cords);
          			   
          			   
@@ -69,16 +70,31 @@ public class Methods {
          		   }
          	   }
          	    float average = findAverageArray(difs);
-         	    float brains[][] = switchPoints(brain, average, bigcords);
-         	    for (int i = 0; i < brains.length; i++){
-         	    	
-         	    	
-         	    	
-         	    	outbrain.add(brains[i].toString());
-         	    	
-         	    }
+         	    outbrain = switchPoints(brain, average, bigcords);
+         	    
      	    }
-     	    return outbrain;
+    
+     	    File outfile = new File("C:\\Users\\JACHICKEN\\Desktop\\outputbrain.txt");
+     	    try{
+     	    	if (!outfile.exists()){
+     	    		outfile.createNewFile();
+     	    	}
+     	    	StringBuilder b = new StringBuilder();
+    			for (int i = 0; i<1024; i++) {
+    				for (int j = 0; j<1024; j++){
+    					b.append("" +outbrain[i][j] + ", ");
+    				}
+    				b.append("\n");
+    			}
+    			String outputString = b.toString();
+    			Files.write(outfile.toPath(), outputString.getBytes(), StandardOpenOption.TRUNCATE_EXISTING);
+     	    	}
+     	    	catch (FileNotFoundException e1) {
+     				e1.printStackTrace();
+     			} catch (IOException e) {
+     				e.printStackTrace();
+     			}
+     	    
      	    }
         
 	public static int swap (int value)
@@ -126,7 +142,8 @@ public class Methods {
                         
                          
                    }
-                   System.out.println(fileName  + "  row: " + j + " ");
+                 System.out.println(".");
+                 
                } 
                //}  
             // Always close files.
@@ -153,61 +170,6 @@ catch(FileNotFoundException ex) {
 		return brain;
 		
 	}
-
-	public void assignArray(float[] array){
-		this.array = array;
-	}
-	
- 	public static void sort(float[] inputArr) {
-     
-    if (inputArr == null || inputArr.length == 0) {
-        
-    }
-    array = inputArr;
-    length = inputArr.length;
-    quickSort(0, length - 1);
-}
-
-	private static void quickSort(int lowerIndex, int higherIndex) {
-     
-    int i = lowerIndex;
-    int j = higherIndex;
-    // calculate pivot number, I am taking pivot as middle index number
-    float pivot = array[lowerIndex+(higherIndex-lowerIndex)/2];
-    // Divide into two arrays
-    while (i <= j) {
-        
-        while (array[i] < pivot) {
-            i++;
-        }
-        while (array[j] > pivot) {
-            j--;
-        }
-        if (i <= j) {
-            exchangeNumbers(i, j);
-            //move index to next position on both sides
-            i++;
-            j--;
-        }
-    }
-    // call quickSort() method recursively
-    if (lowerIndex < j)
-        quickSort(lowerIndex, j);
-    if (i < higherIndex)
-        quickSort(i, higherIndex);
-}
-	/**
-	 * Switches the two 
-	 * @param i
-	 * @param j
-	 * 
-	 */
-	public static void exchangeNumbers(int i, int j) {
-
-    float temp = array[i];
-    array[i] = array[j];
-    array[j] = temp;
-}
 	/**
 	 * 
 	 * @param SPoint the value of the first point
@@ -223,13 +185,7 @@ catch(FileNotFoundException ex) {
 	 * @return Returns a random Cordinate + pixels away from the cord you inputed. Is an array, [0] is the row, and [1] is the column
 	 */
 	public static int[] findRandomPosition(int CurrentPositionRow, int CurrentPositionCol){
-		if (CurrentPositionRow >5 && CurrentPositionRow <1018 && CurrentPositionCol >5 && CurrentPositionCol <1019 ){
-			int [] finco = new int[2];
-			finco[0] = CurrentPositionRow;
-			finco[1] = CurrentPositionCol;
-			return finco;
-		}
-		else{
+		
 		int Fincords[] = new int[2];
 		int randPosition = (int) (Math.random()*100 + 1);
 		if (randPosition == 1){
@@ -328,9 +284,21 @@ catch(FileNotFoundException ex) {
 			Fincords[0] = CurrentPositionRow-5;
 			Fincords[1] = CurrentPositionCol-1;
 		}
+		if (Fincords[0]<0){
+			Fincords[0] = Math.abs(Fincords[0]);
+		}
+		if (Fincords[1]<0){
+			Fincords[1] = Math.abs(Fincords[1]);
+		}
+		if (Fincords[0] >=1024){
+			Fincords[0] = CurrentPositionRow;
+		}
+		if (Fincords[1] >=1024){
+			Fincords[1] = CurrentPositionCol;
+		}
 				return Fincords;
 		}
-	}
+	
 	
 	public byte[] convertFloatToByte(float[][] brains){
 		byte[] fin = new byte[1024*1024];
@@ -350,10 +318,10 @@ catch(FileNotFoundException ex) {
 			os.write(brain);
 			os.close();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		
@@ -380,14 +348,14 @@ catch(FileNotFoundException ex) {
 			for (int j = 0; j<1024; j++){
 				ArrayList<Float[]> cords = bigcords.get(i+j);
 				cords.get(0);
-				Float[] scs = cords.get(1);
-				float scs1 = scs[0];
-				int scssc1 = (int) scs1;
-				int scssc2 = (int) scs1;
-				float dif = findDifference(brains[i][j],brains[scssc1][scssc2] );
+				Float[] secondCordsSet = cords.get(1);
+				float secondCordsSet1 = secondCordsSet[0];
+				int secondCordsSetsc1 = (int) secondCordsSet1;
+				int secondCordsSetsc2 = (int) secondCordsSet1;
+				float dif = findDifference(brains[i][j],brains[secondCordsSetsc1][secondCordsSetsc2] );
 				
 				if (dif < average){
-					brain[scssc1][scssc2] = 0;
+					brain[secondCordsSetsc1][secondCordsSetsc2] = 0;
 				}
 				else if (dif> average){
 					
