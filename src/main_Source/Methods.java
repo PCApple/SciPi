@@ -15,7 +15,7 @@ import java.util.ArrayList;
 public class Methods {
 	int num_simpairs = 1000000;
 	public File importFile;
-    public static int max_its = 10;
+    public static int max_its = 1000;
     public static double res;
     int[] firstxcords = new int[num_simpairs];
     int[] firstycords = new int[num_simpairs];
@@ -25,7 +25,7 @@ public class Methods {
     int tempx;
     int tempy;
     int tempang;
-    public int radius = 1;
+    public int radius = 2;
     static float brain[][] = new float [1024][1024];
     ByteBuffer buffer = ByteBuffer.allocate(brain.length*Integer.BYTES);
     float angles[] = new float[num_simpairs];
@@ -45,6 +45,7 @@ public class Methods {
      	    ByteBuffer.allocate(brain.length*Integer.BYTES);
      	    while(it<max_its){
      	    	it++;
+     	    	System.out.println("Runnning iteration " + it);
      	    	//creeating cordinate pairs
      	    	ArrayList<ArrayList<Float[]>> bigcords = new ArrayList<ArrayList<Float[]>> ();    
          	    float[] difs = new float[1048576];
@@ -65,7 +66,7 @@ public class Methods {
          			   
          			   float seccord =  brain[seccordArray[0]][seccordArray[1]];
          			   float dif = findDifference(brain[i][j], seccord);
-         			   difs[i+j] = dif;
+         			   difs[i*1024+j] = dif;
          			   
          		   }
          	   }
@@ -142,7 +143,7 @@ public class Methods {
                         
                          
                    }
-                 System.out.println(".");
+                 System.out.print(".");
                  
                } 
                //}  
