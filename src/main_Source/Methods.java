@@ -33,7 +33,7 @@ public class Methods {
     protected File defaultSaveFile = new File((System.getProperty("user.home") + System.getProperty("file.separator") + "Desktop\\BrainOutput.txt"));
         public static void main(String [] args)  {
         	float[][] outbrain = null;
-     	    float brain[][] =  importRawFile("C:\\Users\\JACHICKEN\\Downloads\\cerebrum-PET.raw");
+     	    float brain[][] =  importRawFile("C:\\Users\\Amesome Paul Gaming\\Downloads\\cerebrum-PET.raw");
      	    int it = 0;
      	    
      	    for (int i = 0; i<1024; i++){
@@ -46,7 +46,7 @@ public class Methods {
      	    while(it<max_its){
      	    	it++;
      	    	System.out.println("Runnning iteration " + it);
-     	    	//creeating cordinate pairs
+     	    	//creating cordinate pairs
      	    	ArrayList<ArrayList<Float[]>> bigcords = new ArrayList<ArrayList<Float[]>> ();    
          	    float[] difs = new float[1048576];
          	    for (int i=0; i<1024; i++){
@@ -71,11 +71,12 @@ public class Methods {
          		   }
          	   }
          	    float average = findAverageArray(difs);
+         	    System.out.println("Average Diference:" + average);
          	    outbrain = switchPoints(brain, average, bigcords);
          	    
      	    }
     
-     	    File outfile = new File("C:\\Users\\JACHICKEN\\Desktop\\outputbrain.txt");
+     	    File outfile = new File("C:\\Users\\Amesome Paul Gaming\\Desktop\\outputbrain.txt");
      	    try{
      	    	if (!outfile.exists()){
      	    		outfile.createNewFile();
