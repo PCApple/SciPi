@@ -25,7 +25,7 @@ public class Methods {
 //    int tempx;
 //    int tempy;
 //    int tempang;
-    public static int radius = 5;
+    public static int radius = 2;
     static float brain[][] = new float [1024][1024];
     ByteBuffer buffer = ByteBuffer.allocate(brain.length*Integer.BYTES);
     float angles[] = new float[num_simpairs];
@@ -75,7 +75,22 @@ public class Methods {
          	   }
          	    float average = findAverageArray(difs);
          	    System.out.println("Average Diference:" + average);
-         	    switchPoints(brain, average, bigcords);
+         	    int counter= 0;
+         	    for(int i =0; i<1024;i++){{
+         	    	for(int j = 0; j<1024; j++){
+         	    		ArrayList<Float[]> pairs = bigcords.get(counter);
+         	    		Float[] firstPair = pairs.get(0);
+         	    		Float[] secPair = pairs.get(1);
+         	    		float firstXCord = firstPair[0];
+         	    		float firstYCord = firstPair[1];
+         	    		float secXCord = secPair[0];
+         	    		float secYCord = secPair[1];
+         	    		switchPoints(brain,average, (int)firstXCord,(int) firstYCord,(int) secXCord, (int)secYCord);
+         	    		counter++;
+         	    	}
+         	    }
+         	    	
+         	    }
          	    if(it == 1){
          	    	smallestItBrain = brain;
          	    }
@@ -266,17 +281,11 @@ catch(FileNotFoundException ex) {
 		return b;
 		
 	}
+	public static void switchIndividualPoints(){
+		
+	}
+	public static void switchPoints(float[][] brains, float average, int firstXCord, int firstYCord, int secXCord, int secYCord){
 	
-	public static void switchPoints(float[][] brains, float average, ArrayList<ArrayList<Float[]>> bigcords){
-		float [][]brains1 = brains;
-		for (int i = 0; i<1024; i++){
-			for (int j = 0; j<1024; j++){
-				ArrayList<Float[]> cords = bigcords.get(i*1024+j);
-				cords.get(0);
-				Float[] secondCordsSet = cords.get(1);
-				float secondCordsSetXCord = secondCordsSet[0];
-				float secondCordsSetYCord = secondCordsSet[1];
-				float dif = findDifference(brains[i][j],brains[(int) secondCordsSetXCord][(int) secondCordsSetYCord] );
 				
 				if (dif > average && brains[i][j] >44){
 					int[] newPos = findRandomPosition(i,j,radius);
@@ -284,12 +293,22 @@ catch(FileNotFoundException ex) {
 					float geometricAv1 = (float) Math.sqrt(brain[i][j]);
 					float geometricAv2 = (float) Math.sqrt(brains[(int) secondCordsSetXCord][(int) secondCordsSetYCord]);
 					float newVal  = (float) (geometricAv1*geometricAv2);
+				if (dif > average && brains[firstXCord][firstYCord] >44){
+					int[] newPos = findRandomPosition(firstXCord,firstYCord,radius);
+					int newXCord = newPos[0];
+					int newYCord = newPos[1];
+					switchPoints(brains, average, firstXCord,firstYCord,newXCord,newYCord);
+//					float newVal  = (float) ( (((Math.random()*10 + 1)-5)/100)*brains1[i][j]);
+//					float geometricAv1 = (float) Math.sqrt(brain[i][j]);
+//					float geometricAv2 = (float) Math.sqrt(brains[(int) secondCordsSetXCord][(int) secondCordsSetYCord]);
+//					float newVal  = (float) (geometricAv1*geometricAv2);
 					// float newVal  = (float) (brains[i][j] + (((Math.random()*10 + 1)-5)/100)*brains[i][j]);
 					brains1[(int) secondCordsSetXCord][(int) secondCordsSetYCord] = newVal;
 				//	brains[(int) secondCordsSetXCord][(int) secondCordsSetYCord] =brains1[(int) secondCordsSetXCord][(int) secondCordsSetYCord]*brains[(int) secondCordsSetXCord][(int) secondCordsSetYCord]
 				}
-			}
-			brains = brains1;
-		}
-	}
-}
+				else if (dif < average){
+					float newval = (brains[firstXCord][firstYCord] + brains[secXCord][secYCord])/2;
+					brains[firstXCord][firstYCord] = newval;
+					brains[secXCord][secYCord] = newval;
+				}
+}}
