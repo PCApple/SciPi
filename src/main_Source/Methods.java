@@ -286,13 +286,8 @@ catch(FileNotFoundException ex) {
 	}
 	public static void switchPoints(float[][] brains, float average, int firstXCord, int firstYCord, int secXCord, int secYCord){
 	
+				float dif = findDifference(brains[firstXCord][firstYCord],brains[secXCord][secYCord] );
 				
-				if (dif > average && brains[i][j] >44){
-					int[] newPos = findRandomPosition(i,j,radius);
-				//	float newVal  = (float) ( (((Math.random()*10 + 1)-5)/100)*brains1[i][j]);
-					float geometricAv1 = (float) Math.sqrt(brain[i][j]);
-					float geometricAv2 = (float) Math.sqrt(brains[(int) secondCordsSetXCord][(int) secondCordsSetYCord]);
-					float newVal  = (float) (geometricAv1*geometricAv2);
 				if (dif > average && brains[firstXCord][firstYCord] >44){
 					int[] newPos = findRandomPosition(firstXCord,firstYCord,radius);
 					int newXCord = newPos[0];
@@ -303,8 +298,8 @@ catch(FileNotFoundException ex) {
 //					float geometricAv2 = (float) Math.sqrt(brains[(int) secondCordsSetXCord][(int) secondCordsSetYCord]);
 //					float newVal  = (float) (geometricAv1*geometricAv2);
 					// float newVal  = (float) (brains[i][j] + (((Math.random()*10 + 1)-5)/100)*brains[i][j]);
-					brains1[(int) secondCordsSetXCord][(int) secondCordsSetYCord] = newVal;
-				//	brains[(int) secondCordsSetXCord][(int) secondCordsSetYCord] =brains1[(int) secondCordsSetXCord][(int) secondCordsSetYCord]*brains[(int) secondCordsSetXCord][(int) secondCordsSetYCord]
+//					brains1[(int) secondCordsSetXCord][(int) secondCordsSetYCord] = newVal;
+				//	brains[(int) secondCordsSetXCord][(int) secondCordsSetYCord] =brains1[(int) secondCordsSetXCord][(int) secondCordsSetYCord]*brains[(int) secondCordsSetXCord][(int) secondCordsSetYCord
 				}
 				else if (dif < average){
 					float newval = (brains[firstXCord][firstYCord] + brains[secXCord][secYCord])/2;
