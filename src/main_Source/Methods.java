@@ -1,11 +1,9 @@
 package main_Source;
 
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
@@ -13,212 +11,186 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 
 public class Methods {
-	int num_simpairs = 1000000;
-	public File importFile;
-    public static int max_its = 100;
-    public static double res;
-//    int[] firstxcords = new int[num_simpairs];
-//    int[] firstycords = new int[num_simpairs];
-//    int secxcord;
-//    int secycord; 	
-//    int diftemp;
-//    int tempx;
-//    int tempy;
-//    int tempang;
+	// the total amount of iterations for a single run
+    public static int max_its = 20;
+    // the radius of the search area in pixels
     public static int radius = 2;
+    // the values of the image
     static float brain[][] = new float [1024][1024];
-    ByteBuffer buffer = ByteBuffer.allocate(brain.length*Integer.BYTES);
-    float angles[] = new float[num_simpairs];
-    float difs[] = new float[num_simpairs];
-    protected File defaultSaveFile = new File((System.getProperty("user.home") + System.getProperty("file.separator") + "Desktop\\BrainOutput.txt"));
+    // the input raw file
+    public static final String IMPORT_FILE = "C:\\Users\\Amesome Paul Gaming\\Downloads\\PONS_10001-0025-2.raw";
+    // the path for the output folder
+    public static final String OUTPUT_FOLDER= "C:\\Users\\Amesome Paul Gaming\\Desktop\\BrainOutputsFinal\\Patient6\\pons\\output";
+    /**
+     * the main program, inputs a raw image in little endian and outputs it as a text doc at the OUTPUT_FOLDER path
+     */
+    
         public static void main(String [] args)  {
-        	float[][] smallestItBrain = null;
-        	float[][] biggestItBrain = null;
-        	float[][] outbrain =new float[1024][1024];
-     	    float brain[][] =  importRawFile("C:\\Users\\Amesome Paul Gaming\\Downloads\\cerebrum-PET.raw");
+        	//declaring the brain array as the read in raw file
+     	    brain =  importRawFile(IMPORT_FILE);
+     	    // Initializing the iteration count
      	    int it = 0;
-     	    
+     	    // printing out the input image
      	    for (int i = 0; i<1024; i++){
      	    	for (int j = 0; j<5; j++){
      	    		System.out.print(brain[j][i]  + "	");
      	    	}
      	    	System.out.println();
      	    }
-     	    ByteBuffer.allocate(brain.length*Integer.BYTES);
+     	    //starting the iteration sequence
      	    while(it<max_its){
+     	    	// adding the iteration count up by 1
      	    	it++;
+     	    	//printing the iteration
      	    	System.out.println("Runnning iteration " + it);
      	    	//creating coordinate pairs
      	    	ArrayList<ArrayList<Float[]>> bigcords = new ArrayList<ArrayList<Float[]>> ();    
          	    ArrayList<Float> difs = new ArrayList<Float>();
+         	    //finding the coordinate pairs and differences
          	    for (int i=0; i<1024; i++){
          		   for (int j =0; j<1024; j++){
+         			   // finding a new random position and placing it into seccordArray
          			   int[] seccordArray = findRandomPosition(i, j,radius);
-//         			   System.out.println("Second Cord {" + seccordArray[0] + ", " + seccordArray[1] + "}");
+         			   // setting the parent pair into firstCordSet
          			   Float[] firstCordsSet = new Float[2];
          			   firstCordsSet[0] = (float) i;
          			   firstCordsSet[1] = (float) j;
+         			   // Setting the child pair to secondCordSet
          			   Float[] secondCordsSet = new Float[2];
          			   secondCordsSet[0] = (float) seccordArray[0];
          			   secondCordsSet[1] = (float) seccordArray[1];
+         			   // grouping the two pairs in an arraylist
          			   ArrayList<Float[]> cords = new ArrayList<Float[]>();
          			   cords.add(firstCordsSet);
          			   cords.add(secondCordsSet);
+         			   //adding grouped pairs into full arraylist, bigcords
          			   bigcords.add(cords);
-         			   
-         			   
+         			   // getting the value of the child pair
          			   float seccord =  brain[seccordArray[0]][seccordArray[1]];
+         			   //finding the difference between the pairs
          			   float dif = findDifference(brain[i][j], seccord);
+         			   // adding the difference to the difs arraylist
          			   difs.add(dif);
          			   
          		   }
          	   }
+         	    // finding the average of the differences
          	    float average = findAverageArray(difs);
+         	    // printing the average
          	    System.out.println("Average Diference:" + average);
+         	    // creating counter
          	    int counter= 0;
          	    for(int i =0; i<1024;i++){{
          	    	for(int j = 0; j<1024; j++){
+         	    		// pulling pair from bigcords
          	    		ArrayList<Float[]> pairs = bigcords.get(counter);
+         	    		// pulling parent pair from pairs
          	    		Float[] firstPair = pairs.get(0);
+         	    		//pulling child pair from pairs
          	    		Float[] secPair = pairs.get(1);
+         	    		// setting coordinates of parent pair 
          	    		float firstXCord = firstPair[0];
          	    		float firstYCord = firstPair[1];
+         	    		// setting coordinates of child pair 
          	    		float secXCord = secPair[0];
          	    		float secYCord = secPair[1];
+         	    		// applies filter to image
          	    		switchPoints(brain,average, (int)firstXCord,(int) firstYCord,(int) secXCord, (int)secYCord);
+         	    		// adding counter
          	    		counter++;
          	    	}
          	    }
          	    	
          	    }
-         	    if(it == 1){
-         	    	smallestItBrain = brain;
-         	    }
-         	   if(it == max_its){
-        	    	biggestItBrain = brain;
-        	    }
-         	   File outfile = new File("C:\\Users\\Amesome Paul Gaming\\Desktop\\outbrains\\outputbrain" + it+".txt");
+         	   // creates a file for the output
+         	   File outfile = new File(OUTPUT_FOLDER + it+".txt");
         	    try{
+        	    	//checking if the file exists already
         	    	if (!outfile.exists()){
+        	    		// if the file does not exist, it creates a new one
         	    		outfile.createNewFile();
         	    	}
-        	    	StringBuilder b = new StringBuilder();
+        	    	// creating a  new StringBuilder to create the output
+        	    	StringBuilder builder = new StringBuilder();
        			for (int i = 0; i<1024; i++) {
        				for (int j = 0; j<1024; j++){
-       					b.append("" +brain[i][j] + ", ");
+       					// adding each value, followed by a comma
+       					builder.append("" +brain[i][j] + ", ");
        				}
-       				b.append("\n");
+       				// adding a carriage return after each row
+       				builder.append("\n");
        			}
-       			String outputString = b.toString();
+       			// creating a new String to hold the image
+       			String outputString = builder.toString();
+       			// writing the image to a text file
        			Files.write(outfile.toPath(), outputString.getBytes(), StandardOpenOption.TRUNCATE_EXISTING);
         	    	}
-        	    	catch (FileNotFoundException e1) {
-        				e1.printStackTrace();
-        			} catch (IOException e) {
-        				e.printStackTrace();
-        			}
+        	    catch (FileNotFoundException e1) {
+        	    	e1.printStackTrace();
+        	    } catch (IOException e) {
+        	    	e.printStackTrace();
+        	    }
      	    }
-     	    for (int i = 0; i<1024; i++){
-     	    	for (int j = 0; j<1024; j++){
-     	    		outbrain[i][j] = smallestItBrain[i][j] * biggestItBrain[i][j];
-     	    		
-     	    	}
      	    }
-     	   File outfile = new File("C:\\Users\\Amesome Paul Gaming\\Desktop\\outbrains\\outputbrainMulti.txt");
-   	    try{
-   	    	if (!outfile.exists()){
-   	    		outfile.createNewFile();
-   	    	}
-   	    	StringBuilder b = new StringBuilder();
-  			for (int i = 0; i<1024; i++) {
-  				for (int j = 0; j<1024; j++){
-  					b.append("" +outbrain[i][j] + ", ");
-  				}
-  				b.append("\n");
-  			}
-  			String outputString = b.toString();
-  			Files.write(outfile.toPath(), outputString.getBytes(), StandardOpenOption.TRUNCATE_EXISTING);
-   	    	}
-   	    	catch (FileNotFoundException e1) {
-   				e1.printStackTrace();
-   			} catch (IOException e) {
-   				e.printStackTrace();
-   			}
-     	    
-     	    
-     	    }
-        
-	public static int swap (int value)
-    {
+     /**
+      * swapping the bytes from little to big endian   
+      * @param value
+      * @return swapped value
+      */
+	public static int swap (int value){
       int b1 = (value >>  0) & 0xff;
       int b2 = (value >>  8) & 0xff;
       int b3 = (value >> 16) & 0xff;
       int b4 = (value >> 24) & 0xff;
       return b1 << 24 | b2 << 16 | b3 << 8 | b4 << 0;
     }
-   
-	public static float floatSwap (float value)
-    {
-      int intValue = Float.floatToIntBits (value);
-      intValue = swap (intValue);
-      return Float.intBitsToFloat (intValue);
+	/**
+	 * converting the bytes to floats
+	 * @param value
+	 * @return the float value
+	 */
+	public static float floatSwap (float value){
+	
+		int intValue = Float.floatToIntBits (value);
+		intValue = swap (intValue);
+		return Float.intBitsToFloat (intValue);
     }
-  
+	/**
+	 * reads in the file and places it into a 1024 by 1024 float array
+	 * @param route the raw file path
+	 * @return the image in array form
+	 */
 	public static float[][] importRawFile(String route){
-		String fileName = route;
-        System.out.println(
-                "starting '" + 
-  
-       fileName + "'");                
-         
+		// setting the filename to the route
+		String fileName = route;                       
         try {
-            // Use this for reading the data.
-            
- 
-            FileInputStream inputStream = new FileInputStream(fileName);
-        //    BufferedInputStream bin = new BufferedInputStream(inputStream);
+        	// reading in the bytes and wrapping it in a dataIpnput Stream
+        	FileInputStream inputStream = new FileInputStream(fileName);
             DataInputStream din = new DataInputStream(inputStream);
- 
-            //((nRead = inputStream.read()) != -1) {
-                // Convert to String so we can display it.
-                // Of course you wouldn't want to do this with
-                // a 'real' binary file.
-               for (int j = 0; j<1024; j++){
-                   for (int i = 0; i < 1024; i++) {
-                        float c = din.readFloat();
-                        float b=floatSwap(c);
-                        brain[j][i]= b;
-                        
-                        
-                         
-                   }
-                 System.out.print(".");
+            for (int j = 0; j<1024; j++){
+            	   for (int i = 0; i < 1024; i++) {
+                	   // reading in each value and swapping the byte data
+                	   float c = din.readFloat();
+                	   float b=floatSwap(c);
+                	   //setting the value to a position in the brain array
+                	   brain[j][i]= b;
+            	   	}
+            	   // printing a dot
+            	   System.out.print(".");
                  
-               } 
-               //}  
-            // Always close files.
-            inputStream.close();        
+            } 
+            // closing the inputStream din
+            inputStream.close();
+            din.close();
         }
-               
- 
-catch(FileNotFoundException ex) {
-          System.out.println(
-               "Unable to open file '" + 
- 
-      fileName + "'");                
+        catch(FileNotFoundException ex) {
+        	System.out.println("Unable to open file '" +   fileName + "'");                
         }
         catch(IOException ex) {
-           System.out.println(
-                "Error reading file '" 
-                + fileName + "'");                  
-          // Or we could just do this: 
-             ex.printStackTrace();
+        	System.out.println("Error reading file '"  + fileName + "'");                  
+        	ex.printStackTrace();
         }
-           
-               
-                 
 		return brain;
-		
 	}
 	/**
 	 * 
@@ -232,77 +204,72 @@ catch(FileNotFoundException ex) {
 	/**
 	 * @param CurrentPositionRow the y value of the coordinate
 	 * @param CurrentPositionCol the x value of the coordinate
+	 * @param rad the radius of the search area
 	 * @return Returns a random Coordinate + pixels away from the cord you inputed. Is an array, [0] is the row, and [1] is the column
 	 */
 	public static int[] findRandomPosition(int CurrentPositionRow, int CurrentPositionCol,int rad){
+		// creating a new array for the coordinate pair
 		int Fincords[] = new int[2];
+		// finding new random x and y coordinates offsets
 		float randCol = (float) (Math.random() * rad*2 -rad);
 		float randRow = (float) (Math.random() * rad*2-rad);
+		// adding offsets to the coordinates
 		int finX = (int) ((float) CurrentPositionRow + randRow);
 		int finY = (int) ((float) CurrentPositionCol + randCol);
+		// checks if the coordinate is past 1023
 		if(finX >1023){
+			// flips the offset value
 			finX = (int) (CurrentPositionRow-randRow);
 		}
+		// checks if the coordinate is past 1023
 		if (finY >1023){
+			// flips the offset value
 			finY = (int) (CurrentPositionCol -randCol);
 		}
+		// setting the x and y coordinates into the array
 		Fincords[0] = Math.abs(finX);
 		Fincords[1] = Math.abs(finY);
 		return Fincords;
 		
 	}
-	
-	public byte[] convertFloatToByte(float[][] brains){
-		byte[] fin = new byte[1024*1024];
-		int counter = 0;
-		for (int i = 0; i<brains.length; i++){
-			for(int j =0; j<brains.length; j++){
-				fin[counter] = (byte) brains[i][j];
-				counter++;
-			}
-			
-		}
-		return fin;
-	}
+
 	/**
-	 * 
+	 * finds the average of the differances
 	 * @param difs2 is the float array of differences
 	 * @return the average difference between the coordinates
 	 */
 	public static float findAverageArray(ArrayList<Float> difs2){
-		float i = 0;
-		float j = 0;
-		for (float x : difs2){
-			i = i+x;
-			j++;
+		
+		float totalSum = 0;
+		float totalValueCount = 0;
+		for (float value : difs2){
+			if(value>0){
+				totalSum = totalSum+value;
+				totalValueCount++;
+			}
 		}
-		float b = i/j;
+		float average = totalSum/totalValueCount;
 		
-		return b;
-		
-	}
-	public static void switchIndividualPoints(){
+		return average;
 		
 	}
 	public static void switchPoints(float[][] brains, float average, int firstXCord, int firstYCord, int secXCord, int secYCord){
-	
+				// finding the difference between the two coordinates
 				float dif = findDifference(brains[firstXCord][firstYCord],brains[secXCord][secYCord] );
-				
+				// checking if the difference is above the average and not unnecessary noise
 				if (dif > average && brains[firstXCord][firstYCord] >44){
+					// creates a new random position to check
 					int[] newPos = findRandomPosition(firstXCord,firstYCord,radius);
 					int newXCord = newPos[0];
 					int newYCord = newPos[1];
+					// repeats the same process
 					switchPoints(brains, average, firstXCord,firstYCord,newXCord,newYCord);
-//					float newVal  = (float) ( (((Math.random()*10 + 1)-5)/100)*brains1[i][j]);
-//					float geometricAv1 = (float) Math.sqrt(brain[i][j]);
-//					float geometricAv2 = (float) Math.sqrt(brains[(int) secondCordsSetXCord][(int) secondCordsSetYCord]);
-//					float newVal  = (float) (geometricAv1*geometricAv2);
-					// float newVal  = (float) (brains[i][j] + (((Math.random()*10 + 1)-5)/100)*brains[i][j]);
-//					brains1[(int) secondCordsSetXCord][(int) secondCordsSetYCord] = newVal;
-				//	brains[(int) secondCordsSetXCord][(int) secondCordsSetYCord] =brains1[(int) secondCordsSetXCord][(int) secondCordsSetYCord]*brains[(int) secondCordsSetXCord][(int) secondCordsSetYCord
 				}
+				// checks if the difference is less than the average
 				else if (dif < average){
+					// creates a new value that is the average of the parent and the child pairs
 					float newval = (brains[firstXCord][firstYCord] + brains[secXCord][secYCord])/2;
+					// sets the child and parent pairs to the average
 					brains[firstXCord][firstYCord] = newval;
 					brains[secXCord][secYCord] = newval;
 				}
