@@ -9,25 +9,26 @@ import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Methods {
 	// the total amount of iterations for a single run
-    public static int max_its = 20;
+    public static int max_its = 100;
     // the radius of the search area in pixels
-    public static int radius = 2;
+    public static int radius = 5;
     // the values of the image
     static float brain[][] = new float [1024][1024];
     // the input raw file
-    public static final String IMPORT_FILE = "C:\\Users\\Amesome Paul Gaming\\Downloads\\PONS_10001-0025-2.raw";
+    public static String IMPORT_FILE = "C:\\Users\\JACHICKEN\\Desktop\\meme.txt";
     // the path for the output folder
-    public static final String OUTPUT_FOLDER= "C:\\Users\\Amesome Paul Gaming\\Desktop\\BrainOutputsFinal\\Patient6\\pons\\output";
+    public static final String OUTPUT_FOLDER= "C:\\Users\\JACHICKEN\\Desktop\\outputtest\\output";
     /**
      * the main program, inputs a raw image in little endian and outputs it as a text doc at the OUTPUT_FOLDER path
      */
     
-        public static void main(String [] args)  {
+        public static void main()  {
         	//declaring the brain array as the read in raw file
-     	    brain =  importRawFile(IMPORT_FILE);
+     	    brain =  importTextFile(IMPORT_FILE);
      	    // Initializing the iteration count
      	    int it = 0;
      	    // printing out the input image
@@ -160,6 +161,27 @@ public class Methods {
 	 * @param route the raw file path
 	 * @return the image in array form
 	 */
+	public static float[][] importTextFile(String route){
+		String filename = route;
+		float[][] output = new float[1024][1024];
+		File file = new File(filename);
+		try {
+			List<String> lines = Files.readAllLines(file.toPath());
+			for (int i =0; i<1024; i++){
+				System.out.print(".");
+				String line = lines.get(i);
+				String[] values = line.split("\t");
+				for (int j = 0; j<1024; j++){
+					output[i][j] = Float.parseFloat(values[j]);
+				}
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return output;
+		
+	}
 	public static float[][] importRawFile(String route){
 		// setting the filename to the route
 		String fileName = route;                       
@@ -192,6 +214,9 @@ public class Methods {
         }
 		return brain;
 	}
+	
+	
+	
 	/**
 	 * 
 	 * @param SPoint the value of the first point
@@ -243,7 +268,7 @@ public class Methods {
 		float totalSum = 0;
 		float totalValueCount = 0;
 		for (float value : difs2){
-			if(value>0){
+			if(value>0 && value <255){
 				totalSum = totalSum+value;
 				totalValueCount++;
 			}
